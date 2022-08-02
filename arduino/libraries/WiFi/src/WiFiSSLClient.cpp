@@ -73,30 +73,7 @@ int WiFiSSLClient::connect(const char* host, uint16_t port, bool sni)
       return 0;
     }
 
-    mbedtls_ssl_conf_authmode(&_sslConfig, MBEDTLS_SSL_VERIFY_REQUIRED);
-
-    spi_flash_mmap_handle_t handle;
-    const unsigned char* certs_data = {};
-
-    const esp_partition_t* part = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, "certs");
-    if (part == NULL)
-    {
-      return 0;
-    }
-
-    int ret = esp_partition_mmap(part, 0, part->size, SPI_FLASH_MMAP_DATA, (const void**)&certs_data, &handle);
-    if (ret != ESP_OK)
-    {
-      return 0;
-    }
-
-    ret = mbedtls_x509_crt_parse(&_caCrt, certs_data, strlen((char*)certs_data) + 1);
-    if (ret < 0) {
-      stop();
-      return 0;
-    }
-
-    mbedtls_ssl_conf_ca_chain(&_sslConfig, &_caCrt, NULL);
+    mbedtls_ssl_conf_authmode(&_sslConfig, MBEDTLS_SSL_VERIFY_NONE);
 
     mbedtls_ssl_conf_rng(&_sslConfig, mbedtls_ctr_drbg_random, &_ctrDrbgContext);
 
